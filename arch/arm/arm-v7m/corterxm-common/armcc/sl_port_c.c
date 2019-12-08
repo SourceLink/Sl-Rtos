@@ -9,36 +9,10 @@
 */
 
 
-#include "sl_port.h"
+#include "sl_kernel.h"
+
 
 volatile unsigned int sl_interrput_sum;
-
-
-void port_cpu_int_disable(void)
-{
-    __ASM__ __VOLATILE__ ("cpsid i" : : : "memory");
-}
-
-
-void port_cpu_int_enable(void)
-{
-    __ASM__ __VOLATILE__ ("cpsie i" : : : "memory");
-}
-
-unsigned int port_cpu_primask_get(void)
-{
-  unsigned int result;
-
-  __ASM__ __VOLATILE__ ("MRS %0, primask" : "=r" (result));
-
-  return(result);
-}
-
-void port_cpu_primask_set(unsigned int priMask)
-{
-  __ASM__ __VOLATILE__ ("MSR primask, %0" : : "r" (priMask) : "memory");
-}
-
 
 /*
 *********************************************************************************************************
@@ -48,21 +22,20 @@ void port_cpu_primask_set(unsigned int priMask)
 *    返 回 值: 无
 *********************************************************************************************************
 */
-unsigned int *port_proc_stack_init(void *entry, void *arg, unsigned int *stack_addr, size_t stack_szie)
-{ 
+unsigned int *sl_stack_init(sl_process process,unsigned int *stack)
+{
     unsigned int    *user_stack;
-
-    user_stack      = &stack_addr[stack_szie -1];
+    user_stack      = stack;
     user_stack      = (unsigned int *)((unsigned int)(user_stack) & 0xFFFFFFF8ul);
     
     *(--user_stack) = (unsigned int)0x01000000ul;                          //xPSR
-    *(--user_stack) = (unsigned int)entry;                                 // Entry Point
+    *(--user_stack) = (unsigned int)process;                               // Entry Point
     *(--user_stack) = (unsigned int)0xFFFFFFFEul;                          // R14 (LR)
     *(--user_stack) = (unsigned int)0x12121212ul;                          // R12
     *(--user_stack) = (unsigned int)0x03030303ul;                          // R3
     *(--user_stack) = (unsigned int)0x02020202ul;                          // R2
     *(--user_stack) = (unsigned int)0x01010101ul;                          // R1
-    *(--user_stack) = (unsigned int)arg;                                   // R0
+    *(--user_stack) = (unsigned int)0x00000000ul;                          // R0
     
     *(--user_stack) = (unsigned int)0x11111111ul;                          // R11
     *(--user_stack) = (unsigned int)0x10101010ul;                          // R10

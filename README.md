@@ -5,12 +5,19 @@
 在build目录下执行以下命令, 即可完成代码编译:
 
 ```
-cmake .. && make
+cmake .. -DBOARD_FAMILY=NUCLEO_STM32F746ZG && make
 ```
 
-其中`cmake ..`是为了生产makefile, make是为了编译;
+其中`cmake ..`是为了生产makefile, 其中`-DBOARD_FAMILY=NUCLEO_STM32F746ZG`是用来定义板级包名称, make是为了编译;
 
-生成文件在`build/bin`目录下
+生成文件在`build/bin`目录下; 
+
+修改顶层的CMakeLists.txt文件选择你想编译的`demo`： 
+
+
+```
+add_subdirectory(demo/proc_manager)
+```
 
 
 # 二. download

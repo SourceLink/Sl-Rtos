@@ -8,7 +8,7 @@
  ********************************************************************************************************
 */
 
-#include "sys.h"  
+#include "board.h"  
  
 
 
@@ -192,42 +192,6 @@ u8 gpio_pin_get(GPIO_TypeDef* GPIOx,u16 pinx)
 
 
 
-/*
-*********************************************************************************************************
-*    函 数 名: WFI_SET
-*    功能说明: 进入待机模式	 
-*    形    参: 无
-*    返 回 值: 无
-*********************************************************************************************************
-*/
-
-void WFI_SET(void)
-{
-	__ASM volatile("wfi");		  
-}
-
-
-
-/*
-*********************************************************************************************************
-*    函 数 名: system_standby
-*    功能说明: 进入待机模式 
-*    形    参: 无
-*    返 回 值: 无
-*********************************************************************************************************
-*/
-	  
-void system_standby(void)
-{ 
-	SCB->SCR |= 1 << 2;		//使能SLEEPDEEP位 (SYS->CTRL)	   
-	RCC->APB1ENR |= 1 << 28;//使能电源时钟 
-	PWR->CSR2 |= 1 << 8;	//设置PA0用于WKUP唤醒
-	PWR->CR2 |= 0 << 8;		//设置PA0为上升沿唤醒
-	PWR->CR1 |= 1 << 1;		//PDDS置位  
-	PWR->CR1 |= 1 << 0;		//LPDS置位   	
-	WFI_SET();				//执行WFI指令,进入待机模式		 
-}
-
 
 
 /*
@@ -348,15 +312,72 @@ void SystemInit(void)
 
 
 
+void uart_init(u32 pclk2,u32 bound)
+{  	 
+	u32	temp;	   
+	temp=(pclk2 * 1000000 + bound / 2) / bound;	
+	RCC->AHB1ENR |= 1 << 3 ;   					// port a 
+	RCC->APB1ENR |= 1 << 17;  					// uart2
+	gpio_set(GPIOD, PIN5 | PIN6, GPIO_MODE_AF, GPIO_OTYPE_PP, GPIO_SPEED_50M, GPIO_PUPD_PU);
+ 	gpio_af_set(GPIOD, 5, 7);			
+	gpio_af_set(GPIOD, 6, 7);			  	   
+	
+ 	USART2->BRR = temp; 					
+	USART2->CR1 = 0;		 			
+	USART2->CR1 &= ~(1 << 28);	 		
+	USART2->CR1 &= ~(1 << 12);	 		
+	USART2->CR1 &= ~(1 << 15); 			 
+	USART2->CR1	|= 1 << 3;  			
+#if EN_USART2_RX		  				
+	USART2->CR1 |= 1<< 2;  				
+	USART2->CR1 |= 1<< 5;    				    	
+	system_nvic_init(3, 3, USART2_IRQn, 2); 
+#endif
+	USART2->CR1 |= 1 << 0;  			 
+}
+
+
+
+int _write(int file, char *ptr, int len)
+{
+    for (int t = 0; t < len; t++)
+    {
+        while ((USART2->ISR & 0x40) == 0);
+        USART2->TDR = ptr[t];
+    }
+    return len;
+}
+
+
+void board_init(void)
+{
+	system_clock_config(432, 8, 2, 9);
+	cache_enable();
+	uart_init(54, 115200);
+
+	RCC->AHB1ENR |= 1 << 1;			 
+	gpio_set(GPIOB, PIN14 | PIN7 | PIN0, GPIO_MODE_OUT, GPIO_OTYPE_PP, GPIO_SPEED_100M, GPIO_PUPD_PU); //PB0
+
+	SysTick_Config(216000000 / 1000);
+}
 
 
 
 
+void HardFault_Handler(void)
+{
+	while(1);
+}
+                                                                                                                 
 
-
-
-
-
+void USART2_IRQHandler(void)
+{	
+	if (USART2->ISR&(1<<5))						
+	{	 
+		USART2->RQR |= (1 << 3);				
+	} 
+} 
+ 
 
 
 

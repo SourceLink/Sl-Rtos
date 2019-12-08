@@ -3,12 +3,15 @@
 ;* Author		: Sourcelink 
 ;* Version		: V1.0
 ;* Date 		: 2019/10/02
-;* Description	: 
+;* Description	: 2017年2月4日: 完成任务级上下文切换功能;
+;*				  2017年2月15日: 发现系统有HardFault_Handler,经过长时间的debug每次在SysTick_Handler
+;*								 中对任务进行切换会产生fault,但是单步执行时发现只要执行完SysTick_Handler
+;*								 中的函数在执行上下文切换没有出现问题，怀疑是两个中断优先级抢占出现问题
+;*								 pend_sv的优先级没有设置为最低，经查看汇编代码发现优先级设置出错。
 ;***************************************************************************************/
 
 .extern sl_current_process
 .extern sl_ready_process
-.extern sl_interrput_sum
 .extern sl_running_flag
 
 .global port_os_start
@@ -26,61 +29,6 @@
 .align 8
 .thumb
 .syntax unified
-
-;/***************************************************************************************
-;* 函数名称: port_enter_critical
-;*
-;* 功能描述: 进入临界区 
-;*            
-;* 参    数: None
-;*
-;* 返 回 值: None
-;*****************************************************************************************/ 
-.thumb_func
-.type port_enter_critical, %function
-port_enter_critical:
-	cpsid	i														/* Disable all the interrputs */
-
-	push	{r4,r5} 
-
-	ldr		r4, =sl_interrput_sum			
-	ldrb	r5, [R4]
-	add		r5, r5, #1
-	strb 	r5, [r4]												/* sl_interrput_sum++ */
-
-	pop 	{r4,r5}
-
-	bx		lr
-
-
-
-;/***************************************************************************************
-;* 函数名称: port_exit_critical
-;*
-;* 功能描述: 退出临界区 
-;*            
-;* 参    数: None
-;*
-;* 返 回 值: None
-;*****************************************************************************************/
-.thumb_func
-.type port_exit_critical, %function
-port_exit_critical: 
-	push	{r4,r5}
-
-	ldr		r4, =sl_interrput_sum
-	ldrb	r5, [r4]
-	sub		r5, r5, #1
-	strb	r5, [r4]
-
-    mov     r4, #0
-
-    cmp		r5, #0
-	msreq	PRIMASK, r4											/* if sl_interrput_sum = 0 enable interrupt  PRIMASK 写1屏蔽所有可配置优先级中断 */	
-																/* MSREQ = MSR EQ    EQ:标志位z=1 */															
-	pop 	{r4, r5}																
-	
-	bx		lr
 	
 
 ;/**************************************************************************************
@@ -101,7 +49,7 @@ port_os_ctxsw:
     str     r5, [r4]
 	pop		{r4, r5}
 	
-    bx      lr                                                  	/* Enable interrupts at processor level */
+    bx      lr                                                  /* Enable interrupts at processor level */
 
 
 ;/**************************************************************************************
@@ -117,19 +65,19 @@ port_os_ctxsw:
 .type port_os_start, %function
 port_os_start:
 	cpsid   i
-    ldr     r4, =NVIC_SYSPRI3                                  		/* Set the PendSV exception priority */
+    ldr     r4, =NVIC_SYSPRI3                                  	/* Set the PendSV exception priority */
     ldr     r5, =NVIC_PENDSV_PRI
     str     r5, [r4]
 
-    movs    r4, #0                                              	/* Set the PSP to 0 for initial context switch call */
+    movs    r4, #0                                              /* Set the PSP to 0 for initial context switch call */
     msr     psp, r4
 
-	ldr     r4, =sl_running_flag                         			/*  启动切换 */
+	ldr     r4, =sl_running_flag                         		/*  启动切换 */
 	mov     r5, #1
 	strb    r5, [r4] 											
 
-																	/* 切换到第一个task */
-    ldr     r4, =NVIC_INT_CTRL                                  	/* Trigger the PendSV exception (causes context switch) */
+																/* 切换到第一个task */
+    ldr     r4, =NVIC_INT_CTRL                                  /* Trigger the PendSV exception (causes context switch) */
     ldr     r5, =NVIC_PENDSVSET
     str     r5, [r4]
 

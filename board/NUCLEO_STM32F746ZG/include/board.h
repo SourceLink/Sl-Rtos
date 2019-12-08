@@ -1,6 +1,5 @@
 #ifndef __SYS_H
-#define __SYS_H
-
+#define __SYS_H	 
 
 #include "stm32f7xx.h" 
  
@@ -8,7 +7,6 @@
 //0,不支持OS
 //1,支持OS
 #define SYSTEM_SUPPORT_OS		0		//定义系统文件夹是否支持OS
-
 ///////////////////////////////////////////////////////////////////////////////////
 //定义一些常用的数据类型短关键字 
 typedef uint32_t  u32;
@@ -83,9 +81,9 @@ void gpio_af_set(GPIO_TypeDef* GPIOx,u8 BITx,u8 AFx);		//GPIO复用功能设置
 void gpio_set(GPIO_TypeDef* GPIOx,u32 BITx,u32 MODE,u32 OTYPE,u32 OSPEED,u32 PUPD);//GPIO设置函数 
 void gpio_pin_set(GPIO_TypeDef* GPIOx,u16 pinx,u8 status);	//设置某个IO口的输出状态
 u8 gpio_pin_get(GPIO_TypeDef* GPIOx,u16 pinx);				//读取某个IO口的输入状态
-//以下为汇编函数
-void WFI_SET(void);		//执行WFI指令
-void MSR_MSP(u32 addr);	//设置堆栈地址 
+
+void board_init(void);
+
 #endif
 
 
