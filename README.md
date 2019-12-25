@@ -53,7 +53,7 @@ make flash
 - [【视频】06-内核调度上](https://www.bilibili.com/video/av78234770)
 - [【视频】07-内核调度下](https://www.bilibili.com/video/av78389762)
 - [【视频】08-vscode开发stm32](https://www.bilibili.com/video/av78709442)
-
+- [【视频】09-内核双向链表](https://www.bilibili.com/video/av79545686)
 
 ## 文档
 
@@ -64,7 +64,7 @@ make flash
 - [【文档】05-汇编语言](https://sourcelink.top/2019/11/27/rtos-assembly/)
 - [【文档】06-内核调度](https://sourcelink.top/2019/12/05/rtos-kernel-managmer/)
 - [【文档】07-vscode开发stm32](https://sourcelink.top/2019/12/08/vscode-rtos/)
-
+- [【文档】08-内核双向链表](https://sourcelink.top/2019/12/16/kernel-list/)
 
 
 
