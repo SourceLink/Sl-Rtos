@@ -10,15 +10,13 @@
 ;*								 pend_sv的优先级没有设置为最低，经查看汇编代码发现优先级设置出错。
 ;***************************************************************************************/
 
-.extern sl_current_process
-.extern sl_ready_process
-.extern sl_running_flag
+.extern kos_curr_proc
+.extern kos_ready_proc
+.extern kos_running
 
 .global port_os_start
 .global PendSV_Handler
 .global port_os_ctxsw
-.global port_enter_critical
-.global port_exit_critical
 
 .equ NVIC_INT_CTRL,   0xE000ED04                                /* Interrupt control state register. */
 .equ NVIC_SYSPRI3,    0xE000ED20                                /* System priority register (priority 14). */
@@ -72,7 +70,7 @@ port_os_start:
     movs    r4, #0                                              /* Set the PSP to 0 for initial context switch call */
     msr     psp, r4
 
-	ldr     r4, =sl_running_flag                         		/*  启动切换 */
+	ldr     r4, =kos_running                         		    /*  启动切换 */
 	mov     r5, #1
 	strb    r5, [r4] 											
 
@@ -106,13 +104,13 @@ PendSV_Handler:
     subs    r0, r0, #0x20                                       	/* Save remaining regs r4-11 on process stack */
     stm     r0, {r4-r11}
 
-    ldr     r1, =sl_current_process                                 /* sl_current_process->stack_pointer = SP; */
+    ldr     r1, =kos_curr_proc                                 /* sl_current_process->stack_pointer = SP; */
     ldr     r1, [r1]    
     str     r0, [r1]                                          		/* R0 is SP of process being switched out */
                                                             	    /* At this point, entire context of process has been saved */
 SWITCH_PROCESS:	
-    ldr     r0, =sl_current_process                                 /* sl_current_process  = sl_ready_process; */
-    ldr     r1, =sl_ready_process
+    ldr     r0, =kos_curr_proc                                 /* sl_current_process  = sl_ready_process; */
+    ldr     r1, =kos_ready_proc
     ldr     r2, [r1]												/*  R2 = &tcb */
     str     r2, [r0]												/* sl_current_process = &tcb */
 

@@ -3,6 +3,8 @@
 
 #include "kos_config.h"
 #include "kos_list.h"
+#include "kos_compiler.h"
+#include "kos_proc.h"
 
 #define KOS_PRIO_SLOT_SIZE      32
 #define KOS_PRIO_TABLE_SIZE     ((KOS_CONFIG_LOWEST_PRIO + KOS_PRIO_SLOT_SIZE - 1) / KOS_PRIO_SLOT_SIZE)
@@ -17,5 +19,11 @@ struct kos_ready_queue {
     unsigned int highest_prio;
 };
 
+void kos_rq_add_head(struct kos_proc *_proc);
+void kos_rq_add_tail(struct kos_proc *_proc);
+void kos_rq_add(struct kos_proc *_proc);
+void kos_rq_delete(struct kos_proc *_proc);
+
+void kos_sched(void);
 
 #endif

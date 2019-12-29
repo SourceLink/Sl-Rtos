@@ -1,5 +1,7 @@
 #include "kos_sched.h"
-#include "kos_proc.h"
+#include "kos_sys.h"
+#include "kos_cpu.h"
+
 
 struct kos_ready_queue kos_rq;
 
@@ -77,7 +79,6 @@ void register_prio(unsigned int _prio)
     }
 }
 
-
 void kos_rq_init(void)
 {
     unsigned int i;
@@ -120,6 +121,15 @@ void kos_rq_add_tail(struct kos_proc *_proc)
     list_add_tail(rq_list, &_proc->slot_list);
 }
 
+void kos_rq_add(struct kos_proc *_proc)
+{
+    if (_proc->priority > kos_curr_proc->priority) {
+        kos_rq_add_head(_proc);
+    } else {
+        kos_rq_add_tail(_proc);
+    }
+}
+
 
 unsigned int kos_rq_highest_prio(void)
 {
@@ -143,6 +153,7 @@ void kos_rq_delete(struct kos_proc *_proc)
     }
 }
 
+
 struct kos_proc *kos_rq_highest_ready_proc(void)
 {
     struct kos_proc *rproc = NULL;
@@ -152,4 +163,27 @@ struct kos_proc *kos_rq_highest_ready_proc(void)
     rproc = kos_list_entry(node, struct kos_proc, slot_list);
 
     return rproc;
+}
+
+
+void kos_sched(void)
+{
+    unsigned int state = kos_cpu_enter_critical();
+
+    if (!kos_sys_is_running()) {
+        kos_cpu_exit_critical(state);
+        return ;
+    }
+
+    kos_ready_proc = kos_rq_highest_ready_proc();
+
+    if (kos_ready_proc == NULL || 
+        kos_ready_proc == kos_curr_proc) {
+            kos_cpu_exit_critical(state);
+            return ;
+    }
+
+    kos_cpu_exit_critical(state);
+
+    kos_cpu_ctxsw();
 }
