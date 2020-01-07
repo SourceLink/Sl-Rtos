@@ -47,7 +47,7 @@ void kos_cpu_exit_critical(unsigned int _state)
 }
 
 
-unsigned int *kos_proc_stack_init(void *entry, void *arg, unsigned int *stack_addr, size_t stack_szie)
+unsigned int *kos_proc_stack_init(void *entry, void *arg, void *exit, unsigned int *stack_addr, size_t stack_szie)
 {
-    return port_proc_stack_init(entry, arg, stack_addr, stack_szie);
+    return port_proc_stack_init(entry, arg, exit, stack_addr, stack_szie);
 }

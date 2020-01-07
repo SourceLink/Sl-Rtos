@@ -60,7 +60,7 @@ void port_exit_critical(unsigned int _state)
 *    返 回 值: 无
 *********************************************************************************************************
 */
-unsigned int *port_proc_stack_init(void *entry, void *arg, unsigned int *stack_addr, size_t stack_szie)
+unsigned int *port_proc_stack_init(void *entry, void *arg, void *exit, unsigned int *stack_addr, size_t stack_szie)
 { 
     unsigned int    *user_stack;
 
@@ -69,7 +69,7 @@ unsigned int *port_proc_stack_init(void *entry, void *arg, unsigned int *stack_a
     
     *(--user_stack) = (unsigned int)0x01000000ul;                          //xPSR
     *(--user_stack) = (unsigned int)entry;                                 // Entry Point(PC)
-    *(--user_stack) = (unsigned int)0xFFFFFFFEul;                          // R14 (LR)
+    *(--user_stack) = (unsigned int)exit;                                  // R14 (LR)
     *(--user_stack) = (unsigned int)0x12121212ul;                          // R12
     *(--user_stack) = (unsigned int)0x03030303ul;                          // R3
     *(--user_stack) = (unsigned int)0x02020202ul;                          // R2

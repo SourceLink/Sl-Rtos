@@ -30,4 +30,13 @@ struct kos_proc {
 
 typedef void *(*proc_fun)(void *arg);
 
+
+unsigned int kos_proc_create(struct kos_proc *_proc, 
+                            unsigned int *_stack_addr, 
+                            unsigned int _stack_size,
+                            unsigned int _prio,
+                            proc_fun    entry,
+                            void *_arg,
+                            const char *name);
+
 #endif

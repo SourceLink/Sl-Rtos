@@ -10,7 +10,7 @@ void kos_cpu_sched_start(void);
 void kos_cpu_ctxsw(void);
 unsigned int kos_cpu_enter_critical(void);
 void kos_cpu_exit_critical(unsigned int _state);
-unsigned int *kos_proc_stack_init(void *entry, void *arg, unsigned int *stack_addr, unsigned int stack_szie);
+unsigned int *kos_proc_stack_init(void *entry, void *arg, void *exit, unsigned int *stack_addr, unsigned int stack_szie);
 
 
 #endif

@@ -11,4 +11,8 @@ extern unsigned int kos_running;
 
 unsigned int kos_sys_is_running(void);
 
+void kos_sys_init(void);
+void kos_sys_start(void);
+
+
 #endif

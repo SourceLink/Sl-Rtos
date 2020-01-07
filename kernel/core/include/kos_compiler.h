@@ -1,6 +1,7 @@
 #ifndef _KOS_COMPILER_H_
 #define  _KOS_COMPILER_H_
 
+#include "stdio.h"
 
 #if defined(__GNUC__)
 
@@ -24,8 +25,6 @@
 #define __NO_RETURN__       __attribute__((__noreturn__))
 #define __NAKED__           __attribute__((naked))
 #define __WEAK__            __attribute__((weak))
-
-#define NULL                0
 
 #endif
 

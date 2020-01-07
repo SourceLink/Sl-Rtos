@@ -23,7 +23,9 @@ void kos_rq_add_head(struct kos_proc *_proc);
 void kos_rq_add_tail(struct kos_proc *_proc);
 void kos_rq_add(struct kos_proc *_proc);
 void kos_rq_delete(struct kos_proc *_proc);
-
+void kos_rq_init(void);
 void kos_sched(void);
+
+struct kos_proc *kos_rq_highest_ready_proc(void);
 
 #endif

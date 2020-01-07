@@ -10,13 +10,14 @@ set (LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 
 # Set include path
+include_directories(${CMAKE_SOURCE_DIR}/arch/arm/arm-v7m/corterxm-common/gcc)
+include_directories(${CMAKE_SOURCE_DIR}/board/${BOARD_FAMILY}/include)
+include_directories(${CMAKE_SOURCE_DIR}/kernel/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/kernel/cpu/include)
 include_directories(${CMAKE_SOURCE_DIR}/platform/st/CMSIS/Device/ST/STM32F7xx/Include)
 include_directories(${CMAKE_SOURCE_DIR}/platform/st/CMSIS/Include)
 # include_directories(${PROJECT_SOURCE_DIR}/platform/st/STM32F7xx_HAL_Driver/Inc)
-include_directories(${CMAKE_SOURCE_DIR}/kernel/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/kernel/cpu/include)
-include_directories(${CMAKE_SOURCE_DIR}/arch/arm/arm-v7m/corterxm-common/gcc)
-include_directories(${CMAKE_SOURCE_DIR}/board/${BOARD_FAMILY}/include)
+
 
 # The need build source path and build all files
 # aux_source_directory (${PROJECT_SOURCE_DIR}/platform/st/CMSIS/Device/ST/STM32F7xx/Source/Templates STM32F7XX_SRC)
@@ -38,7 +39,6 @@ set (CMAKE_EXE_LINKER_FLAGS "-specs=nano.specs -specs=nosys.specs -T${LDSCRIPT} 
 
 # Generate the target
 add_executable (${PROJECT_NAME}.elf ${CMAKE_SOURCE_DIR}/${STARTUP_SRC} ${STM32F7XX_SRC} ${SOURCE_SRC} )
-
 
 # Link the library to the target
 target_link_libraries (${PROJECT_NAME}.elf slos_kernel board arch)

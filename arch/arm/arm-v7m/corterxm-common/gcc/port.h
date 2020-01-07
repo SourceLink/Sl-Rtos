@@ -11,7 +11,7 @@ extern struct kos_pcb *sl_ready_process;
 
 /************************************************************************************************/
 
-unsigned int *port_proc_stack_init(void *entry, void *arg, unsigned int *stack_addr, size_t stack_szie);
+unsigned int *port_proc_stack_init(void *entry, void *arg, void *exit, unsigned int *stack_addr, size_t stack_szie);
 void port_cpu_int_disable(void);
 void port_cpu_int_enable(void);
 unsigned int port_cpu_primask_get(void);
