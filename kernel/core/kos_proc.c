@@ -2,6 +2,8 @@
 #include "kos_cpu.h"
 #include "kos_sched.h"
 #include "kos_sys.h"
+#include "kos_tick.h"
+
 
 static struct kos_proc *kos_proc_tab[KOS_CONFIG_PID_LIST];
 
@@ -22,7 +24,7 @@ static void _proc_exit_handle(void)
 }
 
 
-unsigned int kos_proc_create(struct kos_proc *_proc, 
+int kos_proc_create(struct kos_proc *_proc, 
                             unsigned int *_stack_addr, 
                             unsigned int _stack_size,
                             unsigned int _prio,
@@ -91,4 +93,26 @@ unsigned int kos_proc_create(struct kos_proc *_proc,
     kos_sched();
 
     return pid;
+}
+
+
+
+void kos_proc_delay(unsigned int _tick)
+{
+    unsigned int state = 0;
+
+    if (unlikely(_tick == 0)) {
+        return ;
+    }
+
+    state = kos_cpu_enter_critical();
+
+    kos_rq_delete(kos_curr_proc);
+
+    /* 必须有个机制来处理延时时间 */
+    kos_tick_add(kos_curr_proc, _tick);
+
+    kos_cpu_exit_critical(state);
+
+    kos_sched();
 }

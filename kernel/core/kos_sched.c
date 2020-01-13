@@ -128,6 +128,8 @@ void kos_rq_add(struct kos_proc *_proc)
     } else {
         kos_rq_add_tail(_proc);
     }
+
+    _proc->state = KOS_PROC_READY;
 }
 
 
@@ -170,7 +172,7 @@ void kos_sched(void)
 {
     unsigned int state = kos_cpu_enter_critical();
 
-    if (!kos_sys_is_running()) {
+    if (!kos_sys_is_running() || kos_sysy_is_inirq()) {
         kos_cpu_exit_critical(state);
         return ;
     }

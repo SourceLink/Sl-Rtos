@@ -10,9 +10,13 @@ extern unsigned int kos_running;
 
 
 unsigned int kos_sys_is_running(void);
+unsigned int kos_sysy_is_inirq(void);
 
 void kos_sys_init(void);
 void kos_sys_start(void);
+void kos_sys_enter_irq(void);
+void kos_sys_exit_irq(void);
 
+void systick_handle(void);
 
 #endif
