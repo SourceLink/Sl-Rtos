@@ -5,6 +5,8 @@
 
 struct kos_ready_queue kos_rq;
 
+static unsigned char kos_sched_lock_nesting;
+
 /*
 *********************************************************************************************************
 *    函 数 名: __find_first_bit
@@ -168,11 +170,75 @@ struct kos_proc *kos_rq_highest_ready_proc(void)
 }
 
 
+int kos_is_sched_locked(void)
+{
+    return (kos_sched_lock_nesting > 0);
+}
+
+int kos_sched_lock(void)
+{
+    unsigned int state = 0;
+
+    if (!kos_sys_is_running()) {
+        return -1;
+    }
+
+    if (kos_sysy_is_inirq()) {
+        return -1;
+    }
+
+    if (kos_sched_lock_nesting >= 250) {
+        return -1;
+    }
+
+    state = kos_cpu_enter_critical();
+    kos_sched_lock_nesting++;
+    kos_cpu_exit_critical(state);
+
+    return 0;
+}
+
+
+int kos_sched_unlock(void)
+{
+    unsigned int state = 0;
+
+    if (!kos_sys_is_running()) {
+        return -1;
+    }
+
+    if (kos_sysy_is_inirq()) {
+        return -1;
+    }
+
+    if (!kos_is_sched_locked()) {
+        return -1;
+    }
+
+    state = kos_cpu_enter_critical();
+    kos_sched_lock_nesting--;
+    kos_cpu_exit_critical(state);
+
+    /* 
+        假如系统之前加调度锁的时候已经发生了一次调度请求
+        但是因为调度锁的缘故未进行调度
+        在解锁的时候需要进行一次调度
+    */
+    kos_sched();
+
+    return 0;
+}
+
+
+
+
 void kos_sched(void)
 {
     unsigned int state = kos_cpu_enter_critical();
 
-    if (!kos_sys_is_running() || kos_sysy_is_inirq()) {
+    if (!kos_sys_is_running() || 
+        kos_sysy_is_inirq() ||
+        kos_is_sched_locked()) {
         kos_cpu_exit_critical(state);
         return ;
     }
