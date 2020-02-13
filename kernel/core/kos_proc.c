@@ -77,7 +77,6 @@ int kos_proc_create(struct kos_proc *_proc,
     /* 3. 初始化其他控制变量 */
     _proc->priority = _prio;
     _proc->proc_name = name;
-    _proc->state = KOS_PROC_READY;
     _proc->tick_wait = 0;
     
     /* 4. 初始化链表 */

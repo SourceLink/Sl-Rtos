@@ -47,9 +47,14 @@ int kos_tick_add(struct kos_proc *_proc, unsigned int _tick)
         return -1;
     }
 
+    if (proc_state_is_sleep(_proc)) {
+        return -1;
+    }
+
     __tick_list_add(_proc, _tick);
 
-    _proc->state = KOS_PROC_SLEEP;
+    proc_state_clr_and_set(_proc, KOS_PROC_READY, KOS_PROC_SLEEP);
+    //_proc->state = KOS_PROC_SLEEP;
 
     return 0;
 }

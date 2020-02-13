@@ -125,13 +125,18 @@ void kos_rq_add_tail(struct kos_proc *_proc)
 
 void kos_rq_add(struct kos_proc *_proc)
 {
+    if (proc_state_is_ready(_proc)) {
+        return ;
+    }
+
     if (_proc->priority > kos_curr_proc->priority) {
         kos_rq_add_head(_proc);
     } else {
         kos_rq_add_tail(_proc);
     }
 
-    _proc->state = KOS_PROC_READY;
+    proc_state_clr_and_set(_proc, PROC_STATE_MASK, KOS_PROC_READY);
+    //_proc->state = KOS_PROC_READY;
 }
 
 
