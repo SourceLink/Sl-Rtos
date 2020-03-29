@@ -53,7 +53,7 @@ port_os_ctxsw:
 ;/**************************************************************************************
 ;* 函数名称: port_os_start
 ;*
-;* 功能描述: 启动OS         
+;* 功能描述: 启动OS
 ;*
 ;* 参    数: None
 ;*
@@ -72,7 +72,7 @@ port_os_start:
 
 	ldr     r4, =kos_running                         		    /*  启动切换 */
 	mov     r5, #1
-	strb    r5, [r4] 											
+	strb    r5, [r4]
 
 																/* 切换到第一个task */
     ldr     r4, =NVIC_INT_CTRL                                  /* Trigger the PendSV exception (causes context switch) */
@@ -83,8 +83,8 @@ port_os_start:
 
 os_while:
     b       os_while                                         	/* Should never get here */
-    
-    
+
+
 ;/**************************************************************************************
 ;* 函数名称: OSPendSV
 ;*
@@ -100,28 +100,28 @@ PendSV_Handler:
     cpsid   i                                                      	/* Prevent interruption during context switch */
     mrs     r0, psp                                             	/* PSP is process stack pointer */
     cbz     r0, SWITCH_PROCESS                     					/* Skip register save the first time if R0=0 bl OS_CPU_PendSVHandler_nosave */
-   
+
     subs    r0, r0, #0x20                                       	/* Save remaining regs r4-11 on process stack */
     stm     r0, {r4-r11}
 
     ldr     r1, =kos_curr_proc                                 /* sl_current_process->stack_pointer = SP; */
-    ldr     r1, [r1]    
+    ldr     r1, [r1]
     str     r0, [r1]                                          		/* R0 is SP of process being switched out */
                                                             	    /* At this point, entire context of process has been saved */
-SWITCH_PROCESS:	
+SWITCH_PROCESS:
     ldr     r0, =kos_curr_proc                                 /* sl_current_process  = sl_ready_process; */
     ldr     r1, =kos_ready_proc
     ldr     r2, [r1]												/*  R2 = &tcb */
     str     r2, [r0]												/* sl_current_process = &tcb */
 
     ldr     r0, [r2]                                            	/* R0 is new process SP; */
-  
+
     ldm     r0, {r4-r11}                                        	/* Restore r4-11 from new process stack */
     adds    r0, r0, #0x20
-            
+
     msr     psp, r0                                             	/* Load PSP with new process SP */
     orr     lr, lr, #0x04                                       	/* Ensure exception return uses process stack */
-    
+
     cpsie   i
     bx      lr                                                  	/* Exception return will restore remaining context */
 

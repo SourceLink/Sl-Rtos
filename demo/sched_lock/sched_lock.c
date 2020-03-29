@@ -22,8 +22,7 @@ void *proc1_fun(void *_arg)
 		kos_sched_unlock();
 		kos_proc_delay(500);
 	}
-	
-		
+
 
     return (void*)1; // 寄存器r3
 	/*
@@ -45,9 +44,8 @@ void *proc2_fun(void *_arg)
 		printf("proc 2\r\n");
 		kos_proc_delay(100);
 	}
-	
 
-    return NULL; 
+    return NULL;
 }
 
 
@@ -55,14 +53,13 @@ int main(void)
 {
 	board_init();
 
-	printf("system init ok\r\n");
-
 	kos_sys_init();
 
 	kos_proc_create(&proc1, proc1_stack, PROC1_STACK_SIZE, 2, proc1_fun, NULL, "proc1");
 	kos_proc_create(&proc2, proc2_stack, PROC2_STACK_SIZE, 1, proc2_fun, NULL, "proc2");
 
 	kos_sys_start();
+
 
     return 0;
 }
